@@ -147,7 +147,7 @@ shinyServer(function(input, output, session) {
             data7%>%
             dplyr::filter(Fixed_Date>=date1,
                           Fixed_Date<=date2)%>%
-            dplyr::group_by(Residential_City,X,Y)%>%
+            dplyr::group_by(Residential_City)%>%
             summarise(count1=n())%>%
             ungroup() %>%
             full_join(City)%>%
