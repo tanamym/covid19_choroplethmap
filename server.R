@@ -135,24 +135,28 @@ shinyServer(function(input, output, session) {
 
     LD <- eventReactive(input$button1,ignoreNULL = FALSE, ignoreInit = FALSE,{
         x=input$x
+        y=input$y
+        color1=input$color1
+        color2=input$color2
         if(is.null(x)){
             x=date$Date[1]
+            y=7
         }
         
         print(x)
         date2=ymd(x)
-        date1=date2-input$y+1
+        date1=date2-y+1
         
         data7.1<-
             data7%>%
             dplyr::filter(Fixed_Date>=date1,
                           Fixed_Date<=date2)%>%
             dplyr::group_by(Residential_City)%>%
-            summarise(count1=n())%>%
+            summarise(count1=sum(n))%>%
             ungroup() %>%
             full_join(City)%>%
             mutate(count1=ifelse(is.na(count1),0,count1))%>%
-            mutate(count2=ifelse(count1>=input$color1*input$y,input$color1*input$y,count1))%>%
+            mutate(count2=ifelse(count1>=color1*y,color1*y,count1))%>%
             #mutate(count7=ifelse(is.na(count7),0,count7))%>%
             dplyr::mutate(col1=pal(count2),
                           #col12=ifelse(count1>input$color2*input$y,"red",col1),
@@ -163,7 +167,7 @@ shinyServer(function(input, output, session) {
             #               col72=ifelse(Residential_City=="横浜市","gray",col72)) %>%
             left_join(jinko,by=c("Residential_City"="City")) %>%
             mutate(count_j1=count1/jinko*100000)%>%
-            mutate(count_j2=ifelse(count_j1>=input$color2*input$y,input$color2*input$y,count_j1))%>%
+            mutate(count_j2=ifelse(count_j1>=color2*y,color2*y,count_j1))%>%
             #mutate(count_j7=count7/jinko*100000)%>%
             filter(!is.na(count_j2))%>%
             dplyr::mutate(col_j1=pal3(count_j2),
@@ -188,8 +192,8 @@ shinyServer(function(input, output, session) {
         data7.2=LD()
         date1=unique(data7.2$date1)
         date2=unique(data7.2$date2)
-        pal  <- colorNumeric(palette=c("white","red"),domain=c(0,as.numeric(input$y)*input$color1), reverse=F)
-        pal3 <- colorNumeric(palette=c("white","red"),domain=c(0,as.numeric(input$y)*input$color2), reverse=F)
+        pal  <- colorNumeric(palette=c("white","red"),domain=c(0,as.numeric(y)*input$color1), reverse=F)
+        pal3 <- colorNumeric(palette=c("white","red"),domain=c(0,as.numeric(y)*input$color2), reverse=F)
         leafletProxy("covid_map",data=data7.2) %>%
                 clearControls() %>%
                 # removeShape(layerId=paste0("X",1:nrow(rosen))) %>%
