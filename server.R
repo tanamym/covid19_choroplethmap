@@ -310,7 +310,9 @@ shinyServer(function(input, output, session) {
         #     mutate(count_j=count/jinko*100000)
 
         data1 <-
-            sp::merge(shp2,data0,
+            sp::merge(shp2,data0%>%
+                        mutate(count2=ifelse(count>=input$color1*y,input$color1*y,count))%>%
+                        mutate(count_j2=ifelse(count_j>=input$color2*y,input$color2*y,count_j)),
                       by=c("N03_003","N03_004"), all=F,duplicateGeoms = TRUE) %>%
             mutate(date1) %>%
             mutate(date2)
@@ -334,7 +336,7 @@ shinyServer(function(input, output, session) {
                         opacity = 0,
                         fillOpacity = 0) %>%
             setShapeStyle(layerId = ~ID,
-                          fillColor = ~pal2(count)) %>%
+                          fillColor = ~pal2(count2)) %>%
             addLegend(pal=pal2,
                       values = c(0,input$y*input$color1),
                       position="bottomright",#color=~col2,labels=~count,
@@ -464,7 +466,7 @@ shinyServer(function(input, output, session) {
                             opacity = 0,
                             fillOpacity = 0) %>%
                 setShapeStyle(layerId = ~ID,
-                              fillColor = ~pal4(count_j)) %>%
+                              fillColor = ~pal4(count_j2)) %>%
                 addLegend(pal=pal4,
                           values = c(0,input$y*input$color2),
                           position="bottomright",#color=~col2,labels=~count,
