@@ -11,35 +11,31 @@ library(curl)
 load("Dataset.RData")
 
 shinyServer(function(input, output, session) {
- data2020 <-
-    fread("https://raw.githubusercontent.com/tanamym/covid19_colopressmap_isehara/main/data2020.csv",encoding="UTF-8")
+ 	data2020 <-
+    	fread("https://raw.githubusercontent.com/tanamym/covid19_colopressmap_isehara/main/data2020.csv",encoding="UTF-8")
   
-  data202106 <-
-    fread("https://raw.githubusercontent.com/tanamym/covid19_colopressmap_isehara/main/data202106.csv",encoding="UTF-8")
+  	data202106 <-
+    	fread("https://raw.githubusercontent.com/tanamym/covid19_colopressmap_isehara/main/data202106.csv",encoding="UTF-8")
   
-  data2021 <-
-    fread("https://raw.githubusercontent.com/tanamym/covid19_colopressmap_isehara/main/data2021.csv",encoding="UTF-8")
-  ycd <-
-    fread("https://raw.githubusercontent.com/tanamym/covid19_colopressmap_isehara/main/yoko_covid.csv",encoding="UTF-8") %>%
-    mutate(Fixed_Date=as.Date(Date),
-           Residential_City=City)
-  data7 <-
-    rbind(data2020,data202106,data2021) %>%
-    mutate(Fixed_Date=as.Date(Fixed_Date)) %>%
-    arrange(desc(Fixed_Date),Hos,hos)%>%
-    count(Fixed_Date,Residential_City,hos)%>%
-    full_join(ycd)%>%
-    mutate(n=ifelse(is.na(n),count,n))
-    #data7<-
-        # read.csv("https://raw.githubusercontent.com/tanamym/covid19_colopressmap_isehara/main/coviddata.csv",fileEncoding = "sJIS")%>%
-        #fread("https://raw.githubusercontent.com/tanamym/covid19_colopressmap_isehara/main/coviddata.csv",encoding = "UTF-8")%>%
-        #mutate(Fixed_Date=as.Date(Fixed_Date))%>%
-        #filter(!is.na(X))
-    date<-
-        data7%>%
-        data.frame()%>%
-        arrange(desc(Fixed_Date))%>%
-        distinct(Fixed_Date)
+ 	data2021 <-
+    	fread("https://raw.githubusercontent.com/tanamym/covid19_colopressmap_isehara/main/data2021.csv",encoding="UTF-8")
+  	ycd <-
+    	fread("https://raw.githubusercontent.com/tanamym/covid19_colopressmap_isehara/main/yoko_covid.csv",encoding="UTF-8") %>%
+    	mutate(Fixed_Date=as.Date(Date),
+           	Residential_City=City)
+  	data7 <-
+    	rbind(data2020,data202106,data2021) %>%
+    	mutate(Fixed_Date=as.Date(Fixed_Date)) %>%
+    	arrange(desc(Fixed_Date),Hos,hos)%>%
+    	count(Fixed_Date,Residential_City,hos)%>%
+    	full_join(ycd)%>%
+    	mutate(n=ifelse(is.na(n),count,n))
+ 	date <- 
+    	data.frame(Date=min(data7$Fixed_Date):max(data7$Fixed_Date)) %>%
+    	arrange(desc(Date)) %>%
+    	mutate(Date=as.Date(Date,origin="1970-01-01")) %>%
+    	filter(Date>="2020-04-20")
+
     
     yoko<-
         # read.csv("https://square.umin.ac.jp/kenkono/csv/ward-new.csv", encoding = "UTF-8", header = F)
@@ -140,7 +136,7 @@ shinyServer(function(input, output, session) {
     LD <- eventReactive(input$button1,ignoreNULL = FALSE, ignoreInit = FALSE,{
         x=input$x
         if(is.null(x)){
-            x=date$Fixed_Date[1]
+            x=date$Date[1]
         }
         
         print(x)
@@ -233,7 +229,7 @@ shinyServer(function(input, output, session) {
     LD_yoko <- eventReactive(input$button1,ignoreNULL = FALSE, ignoreInit = FALSE,{
         x=input$x
         if(is.null(x)){
-            x=date$Fixed_Date[1]
+            x=date$Date[1]
         }
         #x="2021-07-12"
         date2=ymd(x)
