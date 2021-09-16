@@ -137,6 +137,8 @@ shinyServer(function(input, output, session) {
     LD <- eventReactive(input$button1,ignoreNULL = FALSE, ignoreInit = FALSE,{
         x=input$x
         y=input$y
+        color1=50
+        color2=8
         color1=input$color1
         color2=input$color2
         if(is.null(x)){
@@ -159,10 +161,10 @@ shinyServer(function(input, output, session) {
             mutate(count1=ifelse(is.na(count1),0,count1))%>%
             mutate(count2=ifelse(count1>=color1*y,color1*y,count1))%>%
             #mutate(count7=ifelse(is.na(count7),0,count7))%>%
-            dplyr::mutate(col1=pal(count2),
-                          #col12=ifelse(count1>input$color2*input$y,"red",col1),
-                          #col12=ifelse(Residential_City=="横浜市","gray",col1)
-                          )%>%
+            # dplyr::mutate(col1=pal(count2),
+            #               #col12=ifelse(count1>input$color2*input$y,"red",col1),
+            #               #col12=ifelse(Residential_City=="横浜市","gray",col1)
+            #               )%>%
             # dplyr::mutate(col7=pal2(count7),
             #               col72=ifelse(count7>300*as.numeric(7),"red",col7),
             #               col72=ifelse(Residential_City=="横浜市","gray",col72)) %>%
@@ -171,10 +173,10 @@ shinyServer(function(input, output, session) {
             mutate(count_j2=ifelse(count_j1>=color2*y,color2*y,count_j1))%>%
             #mutate(count_j7=count7/jinko*100000)%>%
             filter(!is.na(count_j2))%>%
-            dplyr::mutate(col_j1=pal3(count_j2),
+            #dplyr::mutate(col_j1=pal3(count_j2),
                           #col_j12=ifelse(count_j1>input$color2*input$y,"red",col_j1),
                           #col_j12=ifelse(Residential_City=="横浜市","gray",col_j1)
-                          )%>%
+                          #)%>%
             # dplyr::mutate(col_j7=pal4(count_j7),
             #               col_j72=ifelse(count_j1>8*as.numeric(7),"red",col_j7),
             #               col_j72=ifelse(Residential_City=="横浜市","gray",col_j72)) %>%
@@ -190,11 +192,15 @@ shinyServer(function(input, output, session) {
     st <- reactiveValues(counter = 0)
     observeEvent(input$button1|st$counter==0,ignoreNULL = FALSE, ignoreInit = FALSE,{
         y=input$y
+        color1=50
+        color2=8
+        color1=input$color1
+        color2=input$color2
         data7.2=LD()
         date1=unique(data7.2$date1)
         date2=unique(data7.2$date2)
-        pal  <- colorNumeric(palette=c("white","red"),domain=c(0,as.numeric(y)*input$color1), reverse=F)
-        pal3 <- colorNumeric(palette=c("white","red"),domain=c(0,as.numeric(y)*input$color2), reverse=F)
+        pal  <- colorNumeric(palette=c("white","red"),domain=c(0,as.numeric(y)*color1), reverse=F)
+        pal3 <- colorNumeric(palette=c("white","red"),domain=c(0,as.numeric(y)*color2), reverse=F)
         leafletProxy("covid_map",data=data7.2) %>%
                 clearControls() %>%
                 # removeShape(layerId=paste0("X",1:nrow(rosen))) %>%
@@ -208,7 +214,7 @@ shinyServer(function(input, output, session) {
                 setShapeStyle(layerId = ~ID,
                               fillColor = ~pal(count2)) %>%
                 addLegend(pal=pal,
-                          values = c(0,input$y*input$color1),
+                          values = c(0,y*color1),
                           position="bottomright",#color=~col2,labels=~count,
                           opacity = 1) %>%
                 addControl(tags$div(HTML(paste(date1,date2,sep = "~")))  , position = "topright")
@@ -216,6 +222,7 @@ shinyServer(function(input, output, session) {
           clearControls() %>%
           # removeShape(layerId=paste0("X",1:nrow(rosen))) %>%
           # removeShape(layerId=paste0("Y",1:nrow(tetudo))) %>%
+          removeShape(layerId=paste0("P",1:nrow(data7.2))) %>%
           addPolygons(layerId=paste0("P",1:nrow(data7.2)),
                       label = paste0(data7.2$N03_004," ",round(data7.2$count_j1,2),"人"),
                       labelOptions = labelOptions(textsize = "15px"),
@@ -224,7 +231,7 @@ shinyServer(function(input, output, session) {
           setShapeStyle(layerId = ~ID,
                         fillColor = ~pal3(count_j2)) %>%
           addLegend(pal=pal3,
-                    values = c(0,input$y*input$color2),
+                    values = c(0,y*color2),
                     position="bottomright",#color=~col2,labels=~count,
                     opacity = 1) %>%
           addControl(tags$div(HTML(paste(date1,date2,sep = "~")))  , position = "topright")
