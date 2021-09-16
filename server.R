@@ -28,7 +28,8 @@ shinyServer(function(input, output, session) {
     	mutate(Fixed_Date=as.Date(Fixed_Date)) %>%
     	arrange(desc(Fixed_Date),Hos,hos)%>%
     	count(Fixed_Date,Residential_City,hos)%>%
-    	full_join(ycd)%>%
+    	full_join(ycd%>%
+    	            mutate(hos="yokohama"))%>%
     	mutate(n=ifelse(is.na(n),count,n))
  	date <- 
     	data.frame(Date=min(data7$Fixed_Date):max(data7$Fixed_Date)) %>%
@@ -221,7 +222,7 @@ shinyServer(function(input, output, session) {
                             opacity = 0,
                             fillOpacity = 0) %>%
                 setShapeStyle(layerId = ~ID,
-                              fillColor = ~pal(count_j2)) %>%
+                              fillColor = ~pal3(count_j2)) %>%
                 addLegend(pal=pal3,
                           values = c(0,input$y*input$color2),
                           position="bottomright",#color=~col2,labels=~count,
@@ -354,7 +355,7 @@ shinyServer(function(input, output, session) {
                         opacity = 0,
                         fillOpacity = 0) %>%
             setShapeStyle(layerId = ~ID,
-                          fillColor = ~pal4(count_j)) %>%
+                          fillColor = ~pal4(count_j2)) %>%
             addLegend(pal=pal4,
                       values = c(0,input$y*input$color2),
                       position="bottomright",#color=~col2,labels=~count,
