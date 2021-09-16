@@ -450,7 +450,7 @@ shinyServer(function(input, output, session) {
                                 opacity = 0,
                                 fillOpacity = 0) %>%
                     setShapeStyle(layerId = ~ID,
-                                  fillColor = ~pal(count_j2)) %>%
+                                  fillColor = ~pal3(count_j2)) %>%
                     addLegend(pal=pal3,
                               values = c(0,input$y*input$color2),
                               position="bottomright",#color=~col2,labels=~count,
