@@ -212,22 +212,22 @@ shinyServer(function(input, output, session) {
                           position="bottomright",#color=~col2,labels=~count,
                           opacity = 1) %>%
                 addControl(tags$div(HTML(paste(date1,date2,sep = "~")))  , position = "topright")
-
-            leafletProxy("covid_map2",data=data7.2) %>%
-                clearControls() %>%
-                # removeShape(layerId=paste0("X",1:nrow(rosen))) %>%
-                # removeShape(layerId=paste0("Y",1:nrow(tetudo))) %>%
-                addPolygons(label = paste0(data7.2$N03_004," ",round(data7.2$count_j1,2),"人"),
-                            labelOptions = labelOptions(textsize = "15px"),
-                            opacity = 0,
-                            fillOpacity = 0) %>%
-                setShapeStyle(layerId = ~ID,
-                              fillColor = ~pal3(count_j2)) %>%
-                addLegend(pal=pal3,
-                          values = c(0,input$y*input$color2),
-                          position="bottomright",#color=~col2,labels=~count,
-                          opacity = 1) %>%
-                addControl(tags$div(HTML(paste(date1,date2,sep = "~")))  , position = "topright")
+        leafletProxy("covid_map2",data=data7.2) %>%
+          clearControls() %>%
+          # removeShape(layerId=paste0("X",1:nrow(rosen))) %>%
+          # removeShape(layerId=paste0("Y",1:nrow(tetudo))) %>%
+          addPolygons(layerId=paste0("P",1:nrow(data7.2)),
+                      label = paste0(data7.2$N03_004," ",round(data7.2$count_j1,2),"人"),
+                      labelOptions = labelOptions(textsize = "15px"),
+                      opacity = 0,
+                      fillOpacity = 0) %>%
+          setShapeStyle(layerId = ~ID,
+                        fillColor = ~pal3(count_j2)) %>%
+          addLegend(pal=pal3,
+                    values = c(0,input$y*input$color2),
+                    position="bottomright",#color=~col2,labels=~count,
+                    opacity = 1) %>%
+          addControl(tags$div(HTML(paste(date1,date2,sep = "~")))  , position = "topright")
 
     })
     
