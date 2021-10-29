@@ -11,20 +11,21 @@ library(curl)
 load("Dataset.RData")
 
 shinyServer(function(input, output, session) {
- 	data2020 <-
-    	fread("https://raw.githubusercontent.com/tanamym/covid19_colopressmap_isehara/main/data2020.csv",encoding="UTF-8")
-  
-  	data202106 <-
-    	fread("https://raw.githubusercontent.com/tanamym/covid19_colopressmap_isehara/main/data202106.csv",encoding="UTF-8")
-  
+  data2020 <-
+    fread("https://raw.githubusercontent.com/tanamym/covid19_colopressmap_isehara/main/data2020.csv",encoding="UTF-8")
+  data202106 <-
+    fread("https://raw.githubusercontent.com/tanamym/covid19_colopressmap_isehara/main/data202106.csv",encoding="UTF-8")
+  data202109 <-
+    fread("https://raw.githubusercontent.com/tanamym/covid19_colopressmap_isehara/main/data202109.csv",encoding="UTF-8")
+  	
  	data2021 <-
-    	fread("https://raw.githubusercontent.com/tanamym/covid19_colopressmap_isehara/main/data2021.csv",encoding="UTF-8")
-  	ycd <-
-    	fread("https://raw.githubusercontent.com/tanamym/covid19_colopressmap_isehara/main/yoko_covid.csv",encoding="UTF-8") %>%
-    	mutate(Fixed_Date=as.Date(Date),
+ 	  fread("https://raw.githubusercontent.com/tanamym/covid19_colopressmap_isehara/main/data2021.csv",encoding="UTF-8")
+ 	ycd <-
+ 	  fread("https://raw.githubusercontent.com/tanamym/covid19_colopressmap_isehara/main/yoko_covid.csv",encoding="UTF-8") %>%
+ 	  mutate(Fixed_Date=as.Date(Date),
            	Residential_City=City)
-  	data7 <-
-    	rbind(data2020,data202106,data2021) %>%
+ 	data7 <-
+ 	  rbind(data2020,data202106,data202109,data2021) %>%
     	mutate(Fixed_Date=as.Date(Fixed_Date)) %>%
     	arrange(desc(Fixed_Date),Hos,hos)%>%
     	count(Fixed_Date,Residential_City,hos)%>%
@@ -36,54 +37,67 @@ shinyServer(function(input, output, session) {
     	arrange(desc(Date)) %>%
     	mutate(Date=as.Date(Date,origin="1970-01-01")) %>%
     	filter(Date>="2020-04-20")
-
+ 	yoko <-
+ 	  read.csv("https://square.umin.ac.jp/kenkono/csv/ward-new.csv",encoding = "UTF-8",header = T)
+ 	
+ 	data <-
+ 	  yoko %>%
+ 	  rename(日付=期間) %>%
+ 	  gather(N03_004,count,-日付) %>%
+ 	  filter(!N03_004 %in%c("日本","横浜市","調査中","神奈川県")) %>% #,"市外"
+ 	  mutate(date=str_replace(日付," .+","")) %>%
+ 	  mutate(start=str_replace(date,"~.+",""),
+ 	         end=str_replace(date,".*~","")) %>%
+ 	  mutate(start=as.Date(paste(start),format="%Y/%m/%d")) %>%
+ 	  mutate(end=as.Date(paste(end),format="%Y/%m/%d"))%>%
+ 	  mutate(N03_003="横浜市")
     
-    yoko<-
-        # read.csv("https://square.umin.ac.jp/kenkono/csv/ward-new.csv", encoding = "UTF-8", header = F)
-        fread("https://square.umin.ac.jp/kenkono/csv/ward-new.csv", encoding = "UTF-8",header = F)
-    yoko2<-
-        yoko%>%
-        filter(V1!="",V1!="区名")%>%
-        tidyr::pivot_longer(-V1,
-                            names_to = "V",
-                            values_to="count")%>%
-        rename("name"="V1")
-    yoko3<-
-        yoko%>%
-        filter(V1=="")%>%
-        tidyr::pivot_longer(-V1,
-                            names_to="V",
-                            values_to="year")%>%
-        select(-V1)
-    yoko4<-
-        yoko%>%
-        filter(V1=="区名")%>%
-        tidyr::pivot_longer(-V1,
-                            names_to="V",
-                            values_to="date")%>%
-        select(-V1)
-    data<-
-        left_join(yoko3,yoko4)%>%
-        left_join(yoko2)%>%
-        filter(!name%in%c("日本","横浜市","市外","調査中","神奈川県"))%>%
-        rename("N03_004"="name")%>%
-        mutate(count=as.numeric(as.character(count)))%>%
-        #filter(date=="4/16~4/22")%>%
-        mutate(N03_003="横浜市")%>%
-        mutate(start=str_replace(date,"~.+",""),
-               end=str_replace(date,".*~",""))%>%
-        mutate(end=str_replace(end," .+",""))%>%
-        mutate(year2=str_replace(year,"年",""))%>%
-        # mutate(start=as.Date(paste0(year2,"/",start))) %>%
-        # mutate(end=as.Date(paste0(year2,"/",end))) %>%
-        mutate(start=str_replace(start,"/","-"),
-               end=str_replace(end,"/","-"),
-               start=paste0(year2,"-",start),
-               end=paste0(year2,"-",end),
-               start=as.Date(start),
-               end=as.Date(end))
-      # mutate(date=as.character(date)) %>%
-      # mutate(count=as.numeric(as.character(count)))
+    # yoko<-
+    #     # read.csv("https://square.umin.ac.jp/kenkono/csv/ward-new.csv", encoding = "UTF-8", header = F)
+    #     fread("https://square.umin.ac.jp/kenkono/csv/ward-new.csv", encoding = "UTF-8",header = F)
+    # yoko2<-
+    #     yoko%>%
+    #     filter(V1!="",V1!="区名")%>%
+    #     tidyr::pivot_longer(-V1,
+    #                         names_to = "V",
+    #                         values_to="count")%>%
+    #     rename("name"="V1")
+    # yoko3<-
+    #     yoko%>%
+    #     filter(V1=="")%>%
+    #     tidyr::pivot_longer(-V1,
+    #                         names_to="V",
+    #                         values_to="year")%>%
+    #     select(-V1)
+    # yoko4<-
+    #     yoko%>%
+    #     filter(V1=="区名")%>%
+    #     tidyr::pivot_longer(-V1,
+    #                         names_to="V",
+    #                         values_to="date")%>%
+    #     select(-V1)
+    # data<-
+    #     left_join(yoko3,yoko4)%>%
+    #     left_join(yoko2)%>%
+    #     filter(!name%in%c("日本","横浜市","市外","調査中","神奈川県"))%>%
+    #     rename("N03_004"="name")%>%
+    #     mutate(count=as.numeric(as.character(count)))%>%
+    #     #filter(date=="4/16~4/22")%>%
+    #     mutate(N03_003="横浜市")%>%
+    #     mutate(start=str_replace(date,"~.+",""),
+    #            end=str_replace(date,".*~",""))%>%
+    #     mutate(end=str_replace(end," .+",""))%>%
+    #     mutate(year2=str_replace(year,"年",""))%>%
+    #     # mutate(start=as.Date(paste0(year2,"/",start))) %>%
+    #     # mutate(end=as.Date(paste0(year2,"/",end))) %>%
+    #     mutate(start=str_replace(start,"/","-"),
+    #            end=str_replace(end,"/","-"),
+    #            start=paste0(year2,"-",start),
+    #            end=paste0(year2,"-",end),
+    #            start=as.Date(start),
+    #            end=as.Date(end))
+    #   # mutate(date=as.character(date)) %>%
+    #   # mutate(count=as.numeric(as.character(count)))
     
     output$update<-
         renderUI({
@@ -137,10 +151,16 @@ shinyServer(function(input, output, session) {
     LD <- eventReactive(input$button1,ignoreNULL = FALSE, ignoreInit = FALSE,{
         x=input$x
         y=input$y
-        color1=50
-        color2=8
+        
+
         color1=input$color1
         color2=input$color2
+        if(is.null(color1)){
+          color1=50
+        }
+        if(is.null(color2)){
+          color2=8
+        }
         if(is.null(x)){
             x=date$Date[1]
             y=7
@@ -192,10 +212,14 @@ shinyServer(function(input, output, session) {
     st <- reactiveValues(counter = 0)
     observeEvent(input$button1|st$counter==0,ignoreNULL = FALSE, ignoreInit = FALSE,{
         y=input$y
-        color1=50
-        color2=8
         color1=input$color1
         color2=input$color2
+        if(is.null(color1)){
+          color1=50
+        }
+        if(is.null(color2)){
+          color2=8
+        }
         data7.2=LD()
         date1=unique(data7.2$date1)
         date2=unique(data7.2$date2)
@@ -253,7 +277,7 @@ shinyServer(function(input, output, session) {
           filter(as.numeric(flag)>0)%>%
           arrange(flag)
         
-        if(data0[1,10]==1){
+        if(data0[1,8]==1){
           data0<-#data0%>%filter(date2<=end,start<=date2)%>%
             data0%>%filter((date2<=end&start<=date2)|start>=date1)%>%
             #group_by(N03_004,N03_003,start,end)%>%
@@ -276,7 +300,7 @@ shinyServer(function(input, output, session) {
               mutate(count_j=count/jinko*100000)
 
         }else{
-          if(data0[1,10]==2){
+          if(data0[1,8]==2){
           data0<-
             #data0%>%mutate(max=max(end))%>%filter(end==max)%>%
             data0%>%mutate(max=max(end))%>%filter(end==max|start>=max-y)%>%
