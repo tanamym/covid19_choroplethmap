@@ -267,22 +267,32 @@ shinyServer(function(input, output, session) {
         if(is.null(x)){
             x=date$Date[1]
         }
-        #x="2021-07-12"
+        #x="2021-07-16"
+        #x="2021-11-10"
         date2=ymd(x)
         y=input$y
         #y=14
+        #date1="2021-07-02"
         date1=date2-y+1
-        data0<-data%>%
+        num<-
+          data%>%
+          filter(date1<=start)%>%
+          filter(N03_004=="鶴見区")
+        num2<-y%/%7
+        data0<-
+          data%>%
           mutate(flag=ifelse(date2<=end,1,ifelse(end<date2,2,0)))%>%
           filter(as.numeric(flag)>0)%>%
           arrange(flag)
-        
+     
         if(data0[1,8]==1){
-          data0<-#data0%>%filter(date2<=end,start<=date2)%>%
-            data0%>%filter((date2<=end&start<=date2)|start>=date1)%>%
-            #group_by(N03_004,N03_003,start,end)%>%
-              # summarise(count=sum(count))%>%
-              # ungroup%>%
+            data0<-
+              data%>%
+              filter(date1<=start)%>%
+              group_by(N03_004)%>%
+              mutate(flag=seq(1,nrow(num),1))%>%
+              ungroup()%>%
+              filter(flag<=num2)%>%
               group_by(N03_004,N03_003)%>%
               mutate(
                 # start2=lag(start),
