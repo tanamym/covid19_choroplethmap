@@ -31,7 +31,8 @@ shinyServer(function(input, output, session) {
     	count(Fixed_Date,Residential_City,hos)%>%
     	full_join(ycd%>%
     	            mutate(hos="yokohama"))%>%
-    	mutate(n=ifelse(is.na(n),count,n))
+ 	    mutate(Residential_City=ifelse(!is.na(City),City,Residential_City)) %>%
+    	mutate(n=ifelse(!is.na(City),count,n))
  	date <- 
     	data.frame(Date=min(data7$Fixed_Date):max(data7$Fixed_Date)) %>%
     	arrange(desc(Date)) %>%
